@@ -6,9 +6,11 @@ import urllib
 import json
 import time
 from flask import Flask, redirect, url_for, render_template, request, Response
+
 #from gtts_token import gtts_token
 #import led
 import hangul_watch
+from xml.dom.expatbuilder import parseString
 
 app = Flask(__name__)
 #domain = 'http://127.0.1.1:5000'
@@ -91,6 +93,24 @@ def ledoff():
 #    return json.dumps(resultObj)
 #    # return render_template("gtts.html", url=url + token)
 #
+
+@app.route("/weatherInfo.html")
+def getWeatherPage():
+    return render_template("weatherInfo.html")
+
+@app.route("/weatherInfo")
+def getWeatherInfo():
+    longitude = request.args.get('longitude', '1')
+    latitude = request.args.get('latitude', '1')
+    
+    headers = {'appKey': ''}
+    source = 'http://apis.skplanetx.com/weather/current/hourly?version=1&lat=' + (str(latitude))+ '&lon=' + (str(longitude))
+    
+    r = requests.get(source, headers=headers)
+    location = r.json()["weather"]["hourly"][0]["grid"]["city"] + ' ' + r.json()["weather"]["hourly"][0]["grid"]["county"] + ' '+ r.json()["weather"]["hourly"][0]["grid"]["village"]
+    weather = r.json()["weather"]["hourly"][0]["sky"]["name"]
+
+    return location + " " + weather
 
 if __name__ == "__main__":
     app.run(debug=True, port=8000)
